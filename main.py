@@ -7,6 +7,8 @@ from telegram.ext import ContextTypes
 from config import config
 from database import Database
 from handlers import CommandHandlers
+from keep_alive import keep_alive
+keep_alive()
 
 # Enable logging
 logging.basicConfig(
