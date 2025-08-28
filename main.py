@@ -36,12 +36,84 @@ class GroupMegBot:
             logger.error(f"Failed to initialize bot: {e}")
             raise
     
-    # ... rest of the class remains the same
+    async def post_init(self, application: Application):
+        """Perform post initialization tasks"""
+        await application.bot.set_my_commands([
+            ("start", "Start the bot"),
+            ("help", "Show help"),
+            ("about", "About the bot"),
+            ("rules", "Show group rules"),
+            ("settings", "Group settings (admins only)"),
+        ])
+        
+        # Set webhook if in production
+        if config.webhook_url:
+            webhook_url = f"{config.webhook_url}/{config.token}"
+            await application.bot.set_webhook(
+                webhook_url,
+                drop_pending_updates=True,
+                allowed_updates=["message", "callback_query"]
+            )
+            logger.info(f"Webhook set to: {webhook_url}")
+    
+    async def error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Handle errors in the telegram bot"""
+        logger.error(msg="Exception while handling an update:", exc_info=context.error)
+        
+        try:
+            # Notify the user that an error occurred
+            if update and update.effective_message:
+                await update.effective_message.reply_text(
+                    "❌ An error occurred while processing your request. "
+                    "The developer has been notified."
+                )
+            
+            # Notify the developer
+            if config.admin_id:
+                error_msg = f"Error in update {update.update_id if update else 'N/A'}:\n{context.error}"
+                await context.bot.send_message(chat_id=config.admin_id, text=error_msg)
+        
+        except Exception as e:
+            logger.error(f"Error in error handler: {e}")
+    
+    def setup_handlers(self):
+        """Set up all handlers"""
+        # Add command handlers
+        for handler in self.handlers.get_handlers():
+            self.application.add_handler(handler)
+        
+        # Add error handler
+        self.application.add_error_handler(self.error_handler)
+    
+    def run(self):
+        """Run the bot - THIS IS THE MISSING METHOD"""
+        # Create application
+        self.application = ApplicationBuilder() \
+            .token(config.token) \
+            .post_init(self.post_init) \
+            .build()
+        
+        # Set up handlers
+        self.setup_handlers()
+        
+        # Start the bot
+        if config.webhook_url:
+            # Webhook mode for production
+            self.application.run_webhook(
+                listen="0.0.0.0",
+                port=config.port,
+                secret_token=config.token,
+                webhook_url=f"{config.webhook_url}/{config.token}"
+            )
+        else:
+            # Polling mode for development
+            logger.info("Starting bot in polling mode...")
+            self.application.run_polling()
 
 if __name__ == '__main__':
     try:
         bot = GroupMegBot()
-        bot.run()
+        bot.run()  # This will now work correctly
     except Exception as e:
         logger.error(f"Fatal error: {e}")
         sys.exit(1)
