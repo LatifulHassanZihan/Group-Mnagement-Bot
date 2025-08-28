@@ -1,4 +1,5 @@
 import logging
+import os
 from telegram.ext import Application, ApplicationBuilder
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -6,8 +7,6 @@ from telegram.ext import ContextTypes
 from config import config
 from database import Database
 from handlers import CommandHandlers
-from keep_alive import keep_alive
-keep_alive()
 
 # Enable logging
 logging.basicConfig(
@@ -31,6 +30,12 @@ class GroupMegBot:
             ("rules", "Show group rules"),
             ("settings", "Group settings (admins only)"),
         ])
+        
+        # Set webhook if in production
+        if config.webhook_url:
+            webhook_url = f"{config.webhook_url}/{config.token}"
+            await application.bot.set_webhook(webhook_url)
+            logger.info(f"Webhook set to: {webhook_url}")
     
     async def error_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle errors in the telegram bot"""
@@ -78,11 +83,12 @@ class GroupMegBot:
             self.application.run_webhook(
                 listen="0.0.0.0",
                 port=config.port,
-                url_path=config.token,
-                webhook_url=config.webhook_url
+                secret_token=config.token,
+                webhook_url=f"{config.webhook_url}/{config.token}"
             )
         else:
             # Polling mode for development
+            logger.info("Starting bot in polling mode...")
             self.application.run_polling()
 
 if __name__ == '__main__':
