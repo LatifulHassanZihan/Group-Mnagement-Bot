@@ -1,7 +1,7 @@
 import re
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
-from telegram import Update
+from telegram import Update, ChatPermissions
 from telegram.ext import ContextTypes
 
 from config import config
@@ -271,5 +271,4 @@ class Moderation:
         await context.bot.unban_chat_member(chat_id, user_id)
         
         await update.message.reply_text(
-            f"🔓 User {user_id} has been unbanned!"
-        )
+            f"🔓 User {user_id} has been unbanned!")
