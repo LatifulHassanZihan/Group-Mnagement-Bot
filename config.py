@@ -38,17 +38,26 @@ class Config:
     
     def load_settings(self):
         try:
-            with open('data/group_settings.json', 'r') as f:
-                self.group_settings = json.load(f)
+            # Use /tmp directory for Render compatibility
+            settings_path = '/tmp/group_settings.json'
+            if os.path.exists(settings_path):
+                with open(settings_path, 'r') as f:
+                    self.group_settings = json.load(f)
+            else:
+                self.group_settings = {}
         except (FileNotFoundError, json.JSONDecodeError):
-            # Create data directory if it doesn't exist
-            os.makedirs('data', exist_ok=True)
             self.group_settings = {}
     
     def save_settings(self):
-        os.makedirs('data', exist_ok=True)
-        with open('data/group_settings.json', 'w') as f:
-            json.dump(self.group_settings, f, indent=4)
+        try:
+            # Use /tmp directory for Render compatibility
+            settings_path = '/tmp/group_settings.json'
+            with open(settings_path, 'w') as f:
+                json.dump(self.group_settings, f, indent=4)
+        except Exception as e:
+            print(f"Warning: Could not save settings: {e}")
+            # Continue without saving - settings will be lost on restart
+            # This is acceptable for a free Render deployment
     
     def get_chat_settings(self, chat_id: int) -> Dict[str, Any]:
         if str(chat_id) not in self.group_settings:
