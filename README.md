@@ -1,9 +1,9 @@
 GROUP MEG 🇵🇸 - Advanced Telegram Group Management Bot
 
-https://img.shields.io/badge/python-3.8%252B-blue
-https://img.shields.io/badge/Telegram-Bot-blue
-https://img.shields.io/badge/license-MIT-green
-https://img.shields.io/badge/deploy-Render-66C7FF
+[https://img.shields.io/badge/python-3.8%252B-blue]
+[https://img.shields.io/badge/Telegram-Bot-blue]
+[https://img.shields.io/badge/license-MIT-green]
+[https://img.shields.io/badge/deploy-Render-66C7FF]
 
 A powerful, feature-rich Telegram group management bot built with Python and python-telegram-bot library. Designed for managing groups and channels with advanced administrative capabilities.
 🌟 Features
