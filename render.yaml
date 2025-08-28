@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: group-meg-bot-new
+    name: group-meg-bot
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    startCommand: ./start.sh
     envVars:
       - key: BOT_TOKEN
         sync: false
@@ -16,4 +16,6 @@ services:
       - key: ADMIN_ID
         sync: false
       - key: DATABASE_URL
-        value: sqlite:///bot.db
+        value: sqlite:///:memory:
+      - key: PORT
+        value: 10000
