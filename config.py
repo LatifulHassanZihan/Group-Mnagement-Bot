@@ -1,5 +1,6 @@
 import os
 import json
+import secrets
 from typing import Dict, Any
 
 class Config:
@@ -14,8 +15,11 @@ class Config:
         self.port = int(os.environ.get('PORT', 10000))
         self.admin_id = int(os.environ.get('ADMIN_ID', 0))
         
+        # Generate a proper secret token (alphanumeric + hyphen/underscore only)
+        self.secret_token = os.environ.get('SECRET_TOKEN', self.generate_secret_token())
+        
         # Use Render's persistent disk for database
-        self.database_url = os.environ.get('DATABASE_URL', 'sqlite:///bot.db')
+        self.database_url = os.environ.get('DATABASE_URL', 'sqlite:///:memory:')
         
         # Default settings for groups
         self.default_settings = {
@@ -35,6 +39,12 @@ class Config:
         
         # Load custom settings if available
         self.load_settings()
+    
+    def generate_secret_token(self):
+        """Generate a proper secret token that meets Telegram requirements"""
+        # Telegram requires: 1-256 characters, containing A-Z, a-z, 0-9, _ and -
+        alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_"
+        return ''.join(secrets.choice(alphabet) for _ in range(32))
     
     def load_settings(self):
         try:
@@ -56,8 +66,6 @@ class Config:
                 json.dump(self.group_settings, f, indent=4)
         except Exception as e:
             print(f"Warning: Could not save settings: {e}")
-            # Continue without saving - settings will be lost on restart
-            # This is acceptable for a free Render deployment
     
     def get_chat_settings(self, chat_id: int) -> Dict[str, Any]:
         if str(chat_id) not in self.group_settings:
