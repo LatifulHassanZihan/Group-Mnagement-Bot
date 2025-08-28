@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: group-meg-bot-new-1
+    name: group-meg-bot
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
@@ -13,7 +13,7 @@ services:
       - key: WEBHOOK_URL
         fromService:
           type: web
-          name: group-meg-bot-new-1
+          name: group-meg-bot
           property: url
       - key: ADMIN_ID
         sync: false
